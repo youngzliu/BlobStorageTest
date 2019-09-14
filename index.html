@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <button id="create-button">Create Container</button>
+
+        <input type="file" id="fileinput" />
+        <button id="upload-button">Upload</button>
+
+        <button id="list-button">List</button>
+        
+        <button id="delete-button">Delete</button>
+    </body>
+    <script src="scripts/azure-storage.blob.min.js" charset="utf-8"></script>
+    <script>
+        const account = {
+            //took out my account name and sas token
+            name: YOUR_STORAGE_ACCOUNT_NAME,
+            sas:  YOUR_SAS
+        };
+        const blobUri = 'https://' + account.name + '.blob.core.windows.net';
+        const blobService = AzureStorage.Blob.createBlobServiceWithSas(blobUri, account.sas);
+
+        document.getElementById('create-button').addEventListener('click', () => {
+            blobService.createContainerIfNotExists('mycontainer',  (error, container) => {
+                if (error) {
+                    // Handle create container error
+                } else {
+                    console.log(container.name);
+                }
+            });
+        });
+
+        document.getElementById('upload-button').addEventListener('click', () => {
+
+            const file = document.getElementById('fileinput').files[0];
+
+            blobService.createBlockBlobFromBrowserFile('mycontainer', 
+                                                        file.name, 
+                                                        file, 
+                                                        (error, result) => {
+                                                            if(error) {
+                                                                
+                                                            } else {
+                                                                console.log('Upload is successful');
+                                                            }
+                                                        });
+
+        });
+
+        document.getElementById('list-button').addEventListener('click', () => {
+            blobService.listBlobsSegmented('mycontainer', null, (error, results) => {
+                if (error) {
+                    
+                } else {
+                    results.entries.forEach(blob => {
+                        console.log(blob.name);
+                    });
+                }
+            });
+        });
+    </script>
+</html>
